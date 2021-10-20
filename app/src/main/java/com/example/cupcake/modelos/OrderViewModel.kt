@@ -29,4 +29,8 @@ class OrderViewModel : ViewModel() {
         _fecha.value = fechaPickUp
     }
 
+    public fun noHaySaborConfigurado() : Boolean {
+        return _sabor.value.isNullOrEmpty()
+    }
+
 }
