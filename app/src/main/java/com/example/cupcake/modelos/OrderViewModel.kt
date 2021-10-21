@@ -2,9 +2,14 @@ package com.example.cupcake.modelos
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
+
+private const val PRECIO_POR_CUPCAKE = 2.00
+private const val PRECIO_MISMO_DIA_PICKUP = 3.00
 
 class OrderViewModel : ViewModel() {
 
@@ -20,7 +25,9 @@ class OrderViewModel : ViewModel() {
     val fecha: LiveData<String> = _fecha
 
     private val _precio = MutableLiveData<Double>()
-    val precio: LiveData<Double> = _precio
+    val precio: LiveData<String> = Transformations.map(_precio) {
+        NumberFormat.getCurrencyInstance().format(it)
+    }
 
     init {
         resetOrder()
@@ -28,6 +35,7 @@ class OrderViewModel : ViewModel() {
 
     public fun setCantidad(numeroCupcakes: Int) {
         _cantidad.value = numeroCupcakes
+        actualizarPrecio()
     }
 
     public fun setSabor(sabor: String) {
@@ -36,6 +44,7 @@ class OrderViewModel : ViewModel() {
 
     public fun setFecha(fechaPickUp: String) {
         _fecha.value = fechaPickUp
+        actualizarPrecio()
     }
 
     public fun noHaySaborConfigurado() : Boolean {
@@ -62,6 +71,16 @@ class OrderViewModel : ViewModel() {
         _sabor.value = ""
         _fecha.value = opcionesFecha[0]
         _precio.value = 0.0
+    }
+
+    private fun actualizarPrecio() {
+        var precioCalculado = (cantidad.value ?: 0) * PRECIO_POR_CUPCAKE
+
+        // Verificar si el usuario seleccionó el envío para el mismo dia
+        if (opcionesFecha[0] == _fecha.value) {
+            precioCalculado += PRECIO_MISMO_DIA_PICKUP
+        }
+        _precio.value = precioCalculado
     }
 
 }
